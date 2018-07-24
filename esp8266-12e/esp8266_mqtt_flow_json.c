@@ -8,12 +8,12 @@
 #include <PubSubClient.h>
 //#include <EEPROM.h>
 
-#define wifi_ssid "JohnColtrane"
-#define wifi_password "comoTeLlamas?"
+#define wifi_ssid "xxxxxxxxxxxx"
+#define wifi_password "xxxxxxxxxxxxx"
 
-#define mqtt_server "gui.uva.es"
-#define mqtt_user "kave"      // if exist
-#define mqtt_password "mosquitto_passw"  //idem
+#define mqtt_server "xxxxxxxxxx"
+#define mqtt_user "xxxx"      // if exist
+#define mqtt_password "xxxxxxxxxxxxxxx"  //idem
 
 #define flowMeter_topic "greenhouse/sensor4/flow"
 
