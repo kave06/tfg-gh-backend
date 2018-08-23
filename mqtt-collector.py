@@ -92,7 +92,7 @@ client.on_connect = on_connect
 client.on_message = on_message
 
 client.username_pw_set(username=config.get('mqtt', 'user'), password=config.get('mqtt', 'passw'))
-client.connect(host=config.get('server', 'host'), port=config.getint('server', 'port'), keepalive=60)
+client.connect(host=config.get('mqtt', 'host'), port=config.getint('mqtt', 'port'), keepalive=60)
 
 client.subscribe(config.get('topic', 'general'), 1)
 
