@@ -1,44 +1,55 @@
 /*
-  Projet d'apprentissage d'un objet connecté (IoT)  pour réaliser une sonde de température
-  ESP8266 + DHT22 + LED + MQTT + Home-Assistant
-  Projets DIY (http://www.projetsdiy.fr) - Mai 2016
-  Licence : MIT
+ Author Kave Heidarieh Sorosh
+
+ This program is a part of an End of Degree Project developed already, that
+ controls a greenhouse with IoT devices using MQTT protocol and an APIRest.
+ For further information about the code, check the URLs shown bellow:
+ https://github.com/kave06/tfg-gh-backend/tree/develop
+ https://github.com/kave06/tfg-gh-tools/tree/develop
+ url con API
+
+This programm is based on a project that have MIT licence:
+https://projetsdiy.fr/esp8266-dht22-mqtt-projet-objet-connecte/
+
+Licence: GNU GPLv3
+
 */
+
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
-#include "DHT.h"          // Librairie des capteurs DHT
+#include "DHT.h"          
 
-#define wifi_ssid "xxxxxxxxxxxx"
-#define wifi_password "xxxxxxxxxxxxx"
+#define wifi_ssid "xxxxxxxxxx"
+#define wifi_password "xxxxxxxxx"
 
 #define mqtt_server "xxxxxxxxxx"
-#define mqtt_user "xxxx"      // if exist
-#define mqtt_password "xxxxxxxxxxxxxxx"  //idem
+#define mqtt_user "xxxxxxxxxx"
+#define mqtt_password "xxxxxxxxxx"
 
-#define temperature_topic "greenhouse/sensor3/temperature"  //Topic temperature
+/********************** Change number of sensor and clietName *******************/
+int sensor = 3;
+#define temperature_topic "greenhouse/sensor" + String(sensor)  + "/temperature"  //Topic temperature
 #define humidity_topic "greenhouse/sensor3/humidity"        //Topic humidity
 #define both_topic "greenhouse/sensor3/both"                //Topic both
-#define relay_topic "greenhouse/relay4"
+#define relay_topic "greenhouse/relay4"                     //Topic of relay
+char *clientName = "ESP8266-12e_3";
+/********************************************************************************/
 
 //Buffer to decode MQTT messages
 char message_buff[100];
 
 long lastMsg = 0;
 long lastRecu = 0;
-//long timeBetweenSend = 60 * 5; // in seconds
-long timeBetweenSend = 5; // in seconds
-bool debug = true;  //Display log message if True
+long timeBetweenSend = 60 * 5;  // in seconds
+bool debug = true;              //Display log message if True
 String both = "";
-char *clientName = "ESP8266-12e_3";
-int sensor = 3;
 
-#define DHTPIN D4    // DHT Pin
-#define D2 16
 
 // Un-comment you sensor
-//#define DHTTYPE DHT11       // DHT 11
-#define DHTTYPE DHT22         // DHT 22  (AM2302)
-#define D2 16
+#define DHTTYPE DHT22
+#define DHTPIN D4               // DHT Pin
+#define D0 16                   // Relay Pin
 
 // Create abjects
 DHT dht(DHTPIN, DHTTYPE);
@@ -47,13 +58,13 @@ PubSubClient client(espClient);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(D2,OUTPUT);                     //Pin 2 for LED
+  pinMode(D0,OUTPUT);
   setup_wifi();                           //Connect to Wifi network
   client.setServer(mqtt_server, 5578);    // Configure MQTT connexion
   client.setCallback(callback);           // callback function to execute when a MQTT message
   dht.begin();
 }
-//Connexion to WiFi network
+//Connetion to WiFi network
 void setup_wifi() {
   delay(10);
   Serial.println();
@@ -73,7 +84,7 @@ void setup_wifi() {
   Serial.print(WiFi.localIP());
 }
 
-//Reconnexion
+//Reconnetion
 void reconnect() {
 
   while (!client.connected()) {
@@ -96,7 +107,7 @@ void loop() {
   client.loop();
 
   long now = millis();
-  // Send a message every minute
+  // Send a message every ...
   if (now - lastMsg > 1000 * timeBetweenSend) {
     lastMsg = now;
     // Read humidity
@@ -115,6 +126,7 @@ void loop() {
     // Oh, nothing to send
     if ( isnan(t) || isnan(h)) {
       Serial.println("KO, Please check DHT sensor !");
+      // return to setup()
       return;
     }
 
@@ -136,7 +148,6 @@ void loop() {
 }
 
 // MQTT callback function
-// D'après http://m2mio.tumblr.com/post/30048662088/a-simple-example-arduino-mqtt-m2mio
 void callback(char* topic, byte* payload, unsigned int length) {
 
   int i = 0;
@@ -156,8 +167,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 
   if ( msgString == "ON" ) {
-    digitalWrite(D2,HIGH);
+    digitalWrite(D0,HIGH);
   } else {
-    digitalWrite(D2,LOW);
+    digitalWrite(D0,LOW);
   }
 }
